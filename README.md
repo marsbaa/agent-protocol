@@ -1,235 +1,139 @@
-# Agent Protocol
+# Agent Protocol v0.1
 
-This repository defines the **canonical workflow and artifacts** for agent-driven development.
+## Philosophy
 
-It is **not application code**.
-It is a **process contract** that standardises how design intent is frozen, specified, decomposed, and executed by humans and AI agents.
+AI agents reinterpret intent because conversations are ephemeral. This causes implementation drift and unpredictable outcomes. **Files must be the canonical source of truth.** Agents must not reinterpret frozen artifacts under any circumstances.
 
-If there is a conflict between conversation, memory, or assumptions and the contents of this repository, **this repository wins**.
+This protocol enforces a **strict, non-negotiable** artifact-driven workflow that eliminates ambiguity and ensures deterministic outcomes.
 
----
+## Version
 
-## Purpose
+**Protocol Version**: v0.1
 
-The Agent Protocol exists to:
+**Verification Mode**: Human-executed with manual verification. No automation or scripts are assumed in v0.1.
 
-* Prevent agent reinterpretation of intent
-* Make work repeatable and reviewable
-* Enable parallel execution safely
-* Separate *thinking* from *doing*
-* Treat artifacts as the source of truth
+## Five-Phase Workflow
 
-This protocol supports workflows ranging from:
+This protocol enforces a gated, strictly-ordered workflow:
 
-* single-developer + local scripts
-  to
-* multi-agent, remote, cloud-orchestrated execution
+1. **Design** → Define context, goals, decisions, and trade-offs
+2. **Specification** → Define requirements and scenarios
+3. **Task Decomposition** → Break work into numbered, checkboxed tasks
+4. **Execution** → Implement tasks exactly as specified
+5. **Review** → Validate outputs against frozen artifacts
 
----
+**FORBIDDEN**: Starting phase N+1 before phase N is frozen.
 
-## Core Principle
+Each phase has:
+- **Mandatory inputs** (execution forbidden if missing)
+- **Mandatory outputs** (phase incomplete if missing)
+- **Binary exit conditions** (true = proceed, false = blocked)
+- **Explicit failure conditions** (what triggers rejection)
 
-> **Artifacts are the source of truth. Conversations are not.**
+## Authority Hierarchy
 
-All durable decisions must be captured as files inside `.agent/`.
+When artifacts conflict, the following hierarchy applies (highest to lowest authority):
 
----
+1. **Protocol rules** (this specification)
+2. **Frozen design artifacts**
+3. **Frozen specification artifacts**
+4. **Frozen task artifacts**
+5. **Execution output**
+6. **Conversation** (non-authoritative)
 
-## Folder Structure
+**If lower-order artifacts contradict higher-order artifacts, execution is invalid.**
 
-This repository is intended to be mounted into a project at:
+Agents **MUST** halt when contradictions are detected. Resolution requires unfreezing and correcting the lower-authority artifact.
 
-```
-.agent/
-```
+## Protocol Invariants
 
-Expected structure:
+These rules are binary, enforceable predicates. Violation triggers immediate consequences.
 
-```
-.agent/
-├─ README.md                ← this file (rules & contract)
-├─ design/
-│  ├─ design_final.png
-│  ├─ design_constraints.md
-│  ├─ design_decisions.md
-│  └─ FROZEN.md
-├─ spec/
-│  ├─ spec.md
-│  └─ FROZEN.md
-├─ tasks/
-│  ├─ tasks.json
-│  ├─ task_001_*.md
-│  ├─ task_002_*.md
-│  └─ FROZEN.md
-├─ runs/                    ← optional snapshots of executions
-└─ checklist.md
-```
+### 1. Artifacts Override Conversation
 
-Not all folders must exist on day one, but **once frozen, they are authoritative**.
+**Rule**: Frozen artifacts are authoritative. Conversation is non-authoritative.
 
----
+**Violation Consequence**: Agent output that contradicts frozen artifacts is rejected.
 
-## Phase Model (Mandatory)
+**Enforcement**: Human verification in v0.1. Agents must cite artifact sources for all decisions.
 
-Work progresses strictly through these phases:
+### 2. Frozen Artifacts Cannot Be Reinterpreted
 
-### 1. Design Phase
+**Rule**: Frozen artifacts are immutable and non-reinterpretable. Their meaning is fixed at freeze time.
 
-Artifacts:
+**Violation Consequence**: Execution halts immediately. No work proceeds until artifact is unfrozen and corrected.
 
-* `design_final.png`
-* `design_constraints.md`
-* `design_decisions.md`
+**Enforcement**: Agents must refuse to proceed when frozen artifact interpretation is required. Unfreeze requires explicit marker removal + rationale documentation.
 
-Purpose:
+### 3. Tasks Are Instructions, Not Suggestions
 
-* Capture *intent*, not implementation
-* Make tradeoffs explicit
-* Lock UX / flow / structure
+**Rule**: Task artifacts define mandatory steps. Deviation is forbidden.
 
-Once frozen, **design may not be reinterpreted**.
+**Violation Consequence**: Execution that deviates from tasks is invalid and must be discarded.
 
----
+**Enforcement**: Human verification compares execution output to task checklist. Incomplete or deviated tasks fail review.
 
-### 2. Specification Phase
+### 4. Ambiguity Is Spec Failure
 
-Artifacts:
+**Rule**: Ambiguous specifications are invalid. Agents must reject them, not interpret creatively.
 
-* `spec.md`
+**Violation Consequence**: Execution based on ambiguous specs is invalid. Spec must be unfrozen, clarified, and refrozen.
 
-Must explicitly define:
+**Enforcement**: Agents must halt and request clarification when encountering ambiguity. Proceeding with assumptions is forbidden.
 
-* Goals
-* Non-goals
-* Invariants
-* Acceptance criteria
+## Agent Obligations
 
-No tasks may be considered final until the spec is frozen.
+### Agents MUST:
 
----
+1. **HALT** execution if any invariant is violated
+2. **REJECT** ambiguous specifications rather than infer intent
+3. **FORBID** modification of frozen artifacts without explicit unfreeze
+4. **BLOCK** phase progression until exit conditions are satisfied
+5. **TREAT** all "MUST" statements as hard constraints, not recommendations
 
-### 3. Task Decomposition Phase
+### Agents MUST NOT:
 
-Artifacts:
+1. Reinterpret frozen artifacts under any circumstances
+2. Proceed with partial or incomplete phase outputs
+3. Bypass preflight checklist validation
+4. Treat tasks as suggestions or guidelines
+5. Optimize for convenience over protocol compliance
 
-* `tasks.json` (task graph / DAG)
-* `task_XXX_*.md` (one file per task)
+**Violation of any obligation invalidates all subsequent work.**
 
-Each task **must** define:
+## Out of Scope
 
-* Scope
-* File boundaries
-* Dependencies
-* Acceptance criteria
-* Definition of done
+This protocol does **NOT** define:
 
-Tasks are **instructions**, not suggestions.
+- Runtime system behavior
+- Code architecture decisions
+- Tooling implementation details
+- Performance optimization strategies
+- Language-specific conventions
+- Deployment procedures
 
----
+**Any inference beyond defined artifacts is forbidden.**
 
-### 4. Execution Phase
+Agents **MUST NOT** extrapolate protocol rules to out-of-scope domains.
 
-* Tasks are executed by humans or agents
-* Agents must cite the task files they followed
-* No reinterpretation of design or spec is allowed
+## Repository Structure
 
----
+The protocol defines the following mountable directories:
 
-### 5. Review & Merge Phase
+- `design/` - Design artifacts (mountable into `.agent/design/`)
+- `spec/` - Specification artifacts (mountable into `.agent/spec/`)
+- `tasks/` - Task decomposition artifacts (mountable into `.agent/tasks/`)
 
-* Outputs are reviewed **against artifacts**
-* Failing acceptance criteria is a hard stop
-* Do not silently “fix” agent output
+This README is mountable into `.agent/README.md` for consumer projects.
 
----
+## Impact
 
-## Freezing Rules
+- **Projects**: Any project importing this protocol **MUST** adopt the strict workflow.
 
-Each phase folder contains a `FROZEN.md`.
+- **Agents**: AI agents **MUST** treat artifacts as authoritative over conversation, halt on frozen artifact violation, and reject ambiguous specs rather than interpret creatively.
 
-A folder is considered **frozen** when:
+- **Developer Experience**: Developers gain deterministic, predictable outcomes. Flexibility is sacrificed for correctness. This is intentional.
 
-* `FROZEN.md` exists
-* Its contents reflect the agreed intent
+## License
 
-### Changing frozen content requires:
-
-1. Updating the relevant artifact
-2. Recording the reason in the file
-3. Re-freezing
-
-Silent edits are forbidden.
-
----
-
-## Anti-Drift Rules (Very Important)
-
-* Agents **must not infer intent**
-* Agents **must not fill gaps creatively**
-* If something is unclear, it is a **spec failure**, not an agent problem
-* All execution must reference artifact filenames
-
-If an agent output contradicts `.agent/`, the output is wrong.
-
----
-
-## Runs & Snapshots (Optional but Recommended)
-
-The `runs/` folder may contain snapshots of execution attempts:
-
-```
-runs/
-└─ 2026-02-10_1530/
-   ├─ design/
-   ├─ spec/
-   ├─ tasks/
-   └─ notes.md
-```
-
-This enables:
-
-* Reproducibility
-* Diffing intent changes
-* Safe iteration
-
----
-
-## What This Repo Is NOT
-
-* ❌ A codebase
-* ❌ A task tracker
-* ❌ A conversation log
-* ❌ A place for ad-hoc notes
-
-It is a **contract**.
-
----
-
-## Versioning
-
-This repository is versioned.
-
-Projects should pin a specific version (e.g. via git submodule tag).
-Upgrading the protocol is an explicit decision, not an automatic one.
-
----
-
-## Enforcement
-
-Any tool, script, or agent consuming this repository must:
-
-* Treat it as authoritative
-* Fail loudly on violations
-* Prefer boring, deterministic behavior
-
-If this protocol feels strict, that is intentional.
-
----
-
-## Final Note
-
-> The goal is not speed.
-> The goal is **controlled parallelism without loss of intent**.
-
-If you break the protocol, you may move faster —
-but you will not be building the same thing anymore.
+See [LICENSE](LICENSE) for details.
