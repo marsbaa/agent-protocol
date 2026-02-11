@@ -1,8 +1,9 @@
 # Frozen Artifact
 
-**Timestamp**: 2026-02-11 03:53:40 UTC
+**Timestamp**: 2026-02-11 03:53:40 UTC  
+**Frozen By**: rayyee (human verification)  
 
-**Frozen By**: Antigravity AI Agent (on behalf of rayyee)
+**Scope**: This freeze applies to the Agent Protocol repository at version v0.1 only. It does not freeze consuming projects.
 
 **Artifacts**:
 - README.md
@@ -11,4 +12,6 @@
 - spec/TEMPLATE.md
 - tasks/TEMPLATE.md
 
-**Rationale**: Agent Protocol v0.1 specification complete. All foundational tasks (1-9) are verified complete. This freeze marks the v0.1 protocol as authoritative and non-reinterpretable. The protocol defines the five-phase workflow, authority hierarchy, freeze mechanism, artifact templates, and preflight checklist with binary verification criteria. Version tagged as v0.1 in git.
+**Authority Lock**: The authority hierarchy, invariants, phase model, and freeze semantics defined in README.md are binding and non-reinterpretable.
+
+**Rationale**: Agent Protocol v0.1 specification complete. All foundational tasks (1–9) verified complete. Version tagged as v0.1 in git.
